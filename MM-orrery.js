@@ -4,20 +4,33 @@
 Module.register("MM-orrery", {
     // Default module config
     defaults: {
-        text: "Hi, Everybody!",
-        width: 300,
-        height: 300
+        width: 900,
+        height: 800
     },
+
+    planets : [
+            {name: "Mercury", scale: 1.0},
+            {name: "Venus", scale: 1.0},
+            {name: "Earth", scale: 1.0},
+            {name: "Mars", scale: 1.0},
+            {name: "Jupiter", scale: 0.4},
+            {name: "Saturn", scale: 0.25},
+            {name: "Uranus", scale: 0.1},
+            {name: "Neptune", scale: 0.1}
+    ],
 
     getScripts : function () {
         return ['planetCalcs.js']
     },
 
-    getDom: function () {
+    getDom : function () {
         var wrapper = document.createElement("div");
 
         var canvas = document.createElement("canvas");
         wrapper.appendChild(canvas);
+
+        canvas.width = this.config.width;
+        canvas.height = this.config.height;
 
         var ctx = canvas.getContext("2d");
 
@@ -32,32 +45,30 @@ Module.register("MM-orrery", {
         ctx.arc(canvas.width / 2, canvas.height / 2, 8, 0, 2 * Math.PI, false);
         ctx.fill();
 
-        var date = new Date(year, month - 1, 1);
+        //var date = new Date(year, month - 1, 1);
+        var date = new Date();
 
-        // Update the date displayed on the page
-        var dateSpan = document.getElementById("dateToDraw").innerText = year + "-" + month + "-1";
-
-        console.log("Date: " + date);
+        console.log("Drawing planet positions for " + date);
 
         // Calculate the XYZ positions for each planet
-        for (var i = 0; i < planets.length; ++i) {
-            var xyz = getXyzForPlanet(planets[i].name, date);
+        for (var i = 0; i < this.planets.length; ++i) {
+            var xyz = getXyzForPlanet(this.planets[i].name, date);
 
-            xyz.scale(planets[i].scale);
+            xyz.scale(this.planets[i].scale);
 
-            planets[i].xyz = xyz;
+            this.planets[i].xyz = xyz;
         }
 
         // Calculate the scaling factor to make all of the planets fit on the canvas
         var maxX = 0;
         var maxY = 0;
 
-        for (var i = 0; i < planets.length; ++i) {
-            if (Math.abs(planets[i].xyz.x) > maxX) {
-                maxX = Math.abs(planets[i].xyz.x);
+        for (var i = 0; i < this.planets.length; ++i) {
+            if (Math.abs(this.planets[i].xyz.x) > maxX) {
+                maxX = Math.abs(this.planets[i].xyz.x);
             }
-            if (Math.abs(planets[i].xyz.y) > maxY) {
-                maxY = Math.abs(planets[i].xyz.y);
+            if (Math.abs(this.planets[i].xyz.y) > maxY) {
+                maxY = Math.abs(this.planets[i].xyz.y);
             }
         }
         var maxXY =  Math.max(maxX, maxY);
@@ -67,9 +78,9 @@ Module.register("MM-orrery", {
         console.log("Calculated solarScale of " + solarScale);
 
         // Draw the planets
-        for (var i = 0; i < planets.length; ++i)
+        for (var i = 0; i < this.planets.length; ++i)
         {
-            if (planets[i].name == "Earth") {
+            if (this.planets[i].name == "Earth") {
                 ctx.fillStyle = 'blue';
             }
             else {
@@ -77,14 +88,15 @@ Module.register("MM-orrery", {
             }
             ctx.fillStyle = "white";
 
-            var centerX = planets[i].xyz.x * solarScale + canvas.width / 2;
-            var centerY = canvas.height / 2 - planets[i].xyz.y * solarScale;
+            // Convert heliocentric AU co-ordinates to canvas pixel co-ordinates
+            var centerX = this.planets[i].xyz.x * solarScale + canvas.width / 2;
+            var centerY = canvas.height / 2 - this.planets[i].xyz.y * solarScale;
 
             //console.log("[" + xyz.x + ":" + xyz.y + "] - Drawing circle at " + centerX + ":" + centerY);
 
             ctx.beginPath();
             ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI, false);
-            ctx.fillText(planets[i].name, centerX + 8, centerY - 5);
+            ctx.fillText(this.planets[i].name, centerX + 8, centerY - 5);
             ctx.fill();
         }
 
