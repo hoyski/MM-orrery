@@ -1,5 +1,6 @@
 /**
- * Created by Dave on 2/11/2017.
+ * The code below borrows heavily (i.e. was stolen from) Stephen R Schmitt's 
+ * site http://www.abecedarical.com/javascript/script_planet_orbits.html
  */
 'use strict';
 
@@ -8,7 +9,7 @@ var RADS = Math.PI / 180;                  // convert degrees to radians
 var EPS = 1.0e-12;                      // machine error constant
 
 // orbital element structure
-function elem() {
+function OrbitalElements() {
     this.a = parseFloat("0");                 // semi-major axis [AU]
     this.e = parseFloat("0");                 // eccentricity of orbit
     this.i = parseFloat("0");                 // inclination of orbit [deg]
@@ -37,7 +38,8 @@ var planetNames = new Array("Mercury", "Venus", "Earth",
     "Mars", "Jupiter", "Saturn",
     "Uranus", "Neptune", "Pluto");
 
-// compute ...
+// Computes and returns the heliocentric position in 3-dimensional space for the given planet
+// on the given date. The units for the point are Astronical Units (AUs)
 function getXyzForPlanet(planetName, date) {
 
     if (date == undefined) {
@@ -45,39 +47,31 @@ function getXyzForPlanet(planetName, date) {
         date = new Date();
     }
 
-    // compute day number for date/time
+    // Compute day number for date/time
     var dayNumber = calculateDayNumber(date);
 
-    var orbElems = getOrbitalElements(planetName, dayNumber);
+    var oe = getOrbitalElements(planetName, dayNumber);
 
-    var ap = orbElems.a;
-    var ep = orbElems.e;
-    var ip = orbElems.i;
-    var op = orbElems.O;
-    var pp = orbElems.w;
-    var lp = orbElems.L;
+    // Position of planet in its orbit
+    var mp = mod2pi(oe.L - oe.w);
+    var vp = calculateTrueAnomoly(mp, oe.e);
+    var rp = oe.a * (1 - oe.e * oe.e) / (1 + oe.e * Math.cos(vp));
 
-    // position of planet in its orbit
-    var mp = mod2pi(lp - pp);
-    var vp = calculateTrueAnomoly(mp, orbElems.e);
-    var rp = ap * (1 - ep * ep) / (1 + ep * Math.cos(vp));
+    // Heliocentric rectangular coordinates of planet
+    var xh = rp * (Math.cos(oe.O) * Math.cos(vp + oe.w - oe.O) - Math.sin(oe.O) * Math.sin(vp + oe.w - oe.O) * Math.cos(oe.i));
+    var yh = rp * (Math.sin(oe.O) * Math.cos(vp + oe.w - oe.O) + Math.cos(oe.O) * Math.sin(vp + oe.w - oe.O) * Math.cos(oe.i));
+    var zh = rp * (Math.sin(vp + oe.w - oe.O) * Math.sin(oe.i));
 
-    // heliocentric rectangular coordinates of planet
-    var xh = rp * (Math.cos(op) * Math.cos(vp + pp - op) - Math.sin(op) * Math.sin(vp + pp - op) * Math.cos(ip));
-    var yh = rp * (Math.sin(op) * Math.cos(vp + pp - op) + Math.cos(op) * Math.sin(vp + pp - op) * Math.cos(ip));
-    var zh = rp * (Math.sin(vp + pp - op) * Math.sin(ip));
-
-    console.log(planetName + " xh: " + xh + " yx: " + yh);
+    //console.log(planetName + " xh: " + xh + " yx: " + yh);
 
     return new XYZPoint(xh, yh, zh);
 }
 
-// Compute the elements of the orbit for planet-i at day number-d
-// result is returned in structure p
+// Computes and returns the orbital elements for the given planet on the given day number
 function getOrbitalElements(planetName, dayNumber) {
-    var cy = dayNumber / 36525;                    // centuries since J2000
+    var cy = dayNumber / 36525;  // centuries since J2000
 
-    var orbitalElements = new elem();
+    var orbitalElements = new OrbitalElements();
 
     switch (planetName) {
         case "Mercury":
@@ -159,7 +153,7 @@ function getOrbitalElements(planetName, dayNumber) {
     return orbitalElements;
 }
 
-// day number to/from J2000 (Jan 1.5, 2000)
+// Returns the number of days to/from J2000 (Jan 1.5, 2000)
 function calculateDayNumber(date) {
 
 
@@ -178,16 +172,17 @@ function calculateDayNumber(date) {
     return dayNumber;
 }
 
-// compute the true anomaly from mean anomaly using iteration
+// Computes and returns the true anomaly from mean anomaly using iteration
 //  M - mean anomaly in radians
 //  e - orbit eccentricity
 function calculateTrueAnomoly(M, e) {
     var V, E1;
 
-    // initial approximation of eccentric anomaly
+    // Initial approximation of eccentric anomaly
     var E = M + e * Math.sin(M) * (1.0 + e * Math.cos(M));
 
-    do                                   // iterate to improve accuracy
+
+    do                                   
     {
         E1 = E;
         E = E1 - (E1 - e * Math.sin(E1) - M) / (1 - e * Math.cos(E1));
