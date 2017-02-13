@@ -6,9 +6,9 @@ Module.register("MM-orrery", {
     defaults: {
         width: 900,
         height: 800,
-        updateInterval: 24 * 60 * 60 * 1000, // Default to daily updates
+        updateInterval: 24, // Default to daily updates
         showLabels: true,
-        labelColor: '#808080',
+        labelColor: 'gray',
         labelFont: '12px Arial',
 
         // Scales
@@ -151,15 +151,16 @@ Module.register("MM-orrery", {
             var centerY = canvas.height / 2 - this.planets[i].xyz.y * solarScale;
 
             // Draw the planet
+            var radius = this.getPlanetRadius(this.planets[i].name, 5);
             ctx.beginPath();
-            ctx.arc(centerX, centerY, this.getPlanetRadius(this.planets[i].name, 5), 0, 2 * Math.PI, false);
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
             ctx.fill();
 
             // Draw the label
             if (this.config.showLabels == true) {
                 ctx.beginPath();
                 ctx.fillStyle = this.config.labelColor;
-                ctx.fillText(this.planets[i].name, centerX + 8, centerY - 5);
+                ctx.fillText(this.planets[i].name, centerX + radius + 2, centerY - radius);
                 ctx.fill();
             }
         }
@@ -168,7 +169,7 @@ Module.register("MM-orrery", {
     },
 
     start: function () {
-        var updateInterval = this.config.updateInterval;
+        var updateInterval = this.config.updateInterval * 60 * 60 * 1000;
 
         var self = this;
 
