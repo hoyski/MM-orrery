@@ -18,6 +18,7 @@ Module.register("MM-orrery", {
         neptuneScale: 0.1,
 
         // Drawing sizes
+        sunRadius: 8,
         mercuryRadius: 3,
         venusRadius: 5,
         earthRadius: 5,
@@ -25,7 +26,11 @@ Module.register("MM-orrery", {
         jupiterRadius: 8,
         saturnRadius: 7,
         uranusRadius: 6,
-        neptuneRadius: 6
+        neptuneRadius: 6,
+
+        // Sun and planet colors
+        sunColor: 'yellow'
+        /* All others default to white */
     },
 
     planets: [
@@ -63,22 +68,28 @@ Module.register("MM-orrery", {
         }
     ],
 
-    // Returns the scaling factor for the given planet or 'dfltVal' if none has been defined
-    getPlanetScale: function (planetName, dfltVal) {
-        var value = this.config[planetName.toLowerCase() + 'Scale'];
+    // Returns configuration value for the given planet and config type or 'dfltVal' if none has been defined
+    getPlanetConfig: function (planetName, configType, dfltVal) {
+        var value = this.config[planetName.toLowerCase() + configType];
         if (value == undefined) {
             return dfltVal;
         }
         return value;
     },
 
+    // Returns the scaling factor for the given planet or 'dfltVal' if none has been defined
+    getPlanetScale: function (planetName, dfltVal) {
+        return this.getPlanetConfig(planetName, 'Scale', dfltVal);
+    },
+
     // Returns the radius in pixels to rander the given planet or 'dfltVal' if none has been defined
     getPlanetRadius: function (planetName, dfltVal) {
-        var value = this.config[planetName.toLowerCase() + 'Radius'];
-        if (value == undefined) {
-            return dfltVal;
-        }
-        return value;
+        return this.getPlanetConfig(planetName, 'Radius', dfltVal);
+    },
+
+    // Returns the color to render the given planet or 'dfltVal' if none has been defined
+    getPlanetColor: function (planetName, dfltVal) {
+        return this.getPlanetConfig(planetName, 'Color', dfltVal);
     },
 
     getScripts: function () {
@@ -137,14 +148,13 @@ Module.register("MM-orrery", {
 
         // Draw the sun
         ctx.beginPath();
-        ctx.fillStyle = 'yellow';
-        ctx.arc(canvas.width / 2, canvas.height / 2, 8, 0, 2 * Math.PI, false);
+        ctx.fillStyle = this.getPlanetColor('sun');
+        var sunRadius = this.getPlanetRadius('sun');
+        ctx.arc(canvas.width / 2, canvas.height / 2, sunRadius, 0, 2 * Math.PI, false);
         ctx.fill();
 
         // Draw the planets
         for (var i = 0; i < this.planets.length; ++i) {
-
-            ctx.fillStyle = "white";
 
             // Convert heliocentric AU co-ordinates to canvas pixel co-ordinates
             var centerX = this.planets[i].xyz.x * solarScale + canvas.width / 2;
@@ -152,6 +162,8 @@ Module.register("MM-orrery", {
 
             // Draw the planet
             var radius = this.getPlanetRadius(this.planets[i].name, 5);
+
+            ctx.fillStyle = this.getPlanetColor(this.planets[i].name, 'white');
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
             ctx.fill();
