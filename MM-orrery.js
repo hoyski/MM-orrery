@@ -14,8 +14,8 @@ Module.register("MM-orrery", {
         // Scales
         jupiterScale: 0.4,
         saturnScale: 0.25,
-        uranusScale: 0.1,
-        neptuneScale: 0.1,
+        uranusScale: 0.15,
+        neptuneScale: 0.15,
 
         // Drawing sizes
         sunRadius: 8,
