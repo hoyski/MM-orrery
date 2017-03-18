@@ -29,8 +29,10 @@ Module.register("MM-orrery", {
         neptuneRadius: 6,
 
         // Sun and planet colors
-        sunColor: 'yellow'
+        sunColor: 'yellow',
         /* All others default to white */
+
+        debug: false
     },
 
     planets: [
@@ -98,10 +100,18 @@ Module.register("MM-orrery", {
 
 
     getDom: function () {
+        var date = new Date();
+
+        Log.log("Drawing planet positions for " + date);
+
         // Create the div for the module and the canvas for the drawing
         var wrapper = document.createElement("div");
 
         var canvas = document.createElement("canvas");
+
+        // Add something to make the HTML different from the previous rendering 
+        // so that MagicMirror will redraw the canvas
+        canvas.setAttribute("id", "MM_orrery_" + date.getTime()); 
         wrapper.appendChild(canvas);
 
         canvas.width = this.config.width;
@@ -113,11 +123,6 @@ Module.register("MM-orrery", {
 
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        //var date = new Date(year, month - 1, 1);
-        var date = new Date();
-
-        Log.log("Drawing planet positions for " + date);
 
         // Calculate the XYZ positions for each planet
         for (var i = 0; i < this.planets.length; ++i) {
@@ -177,6 +182,13 @@ Module.register("MM-orrery", {
             }
         }
 
+        if (this.config.debug) {
+            ctx.beginPath();
+            ctx.fillStyle = 'white';
+            ctx.fillText("Redrew planets at " + date, 10, canvas.height);
+            ctx.fill();
+        }
+        
         return wrapper;
     },
 
