@@ -119,6 +119,21 @@ Module.register("MM-orrery", {
 			}
 		}
 
+		if (this.config.showOrbits) {
+			// Calculate all of the positions of Neptune's orbit and update maxX and maxY accordingly
+			let neptune = this.planets[this.planets.length - 1];
+			for (let i = 0; i < neptune.orbitNumSteps; ++i, date.setDate(date.getDate() + neptune.orbitStepDays)) {
+				let xyz = getXyzForPlanet(neptune.name, date);
+				xyz.scale(this.getPlanetScale(neptune.name, 1.0));
+				if (Math.abs(xyz.x) > maxX) {
+					maxX = Math.abs(xyz.x);
+				}
+				if (Math.abs(xyz.y) > maxY) {
+					maxY = Math.abs(xyz.y);
+				}
+			}
+		}
+
 		// Calculate the scaling factor from AUs to canvas
 		var maxXY = Math.max(maxX, maxY);
 		var minWH = Math.min(canvas.width, canvas.height) / 2;
