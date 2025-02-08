@@ -1,5 +1,7 @@
 # MM-orrery
-A module for MagicMirror<sup>2</sup> that displays all of the planets and their current relation to the Sun
+A module for MagicMirror<sup>2</sup> that displays all of the planets and their current positions relative to the Sun
+
+<img src="./screenshot/MM-orrery-screenshot.png" width="800px">
 
 ## Dependencies
   * A [MagicMirror<sup>2</sup>](https://magicmirror.builders/) installation
@@ -23,7 +25,7 @@ A module for MagicMirror<sup>2</sup> that displays all of the planets and their 
         uranusScale: 0.4,
         neptuneScale: 0.4
     }
-}, // Note: Remove the comma if MM-orrery is the last module in your list
+},
 ```
 ## Config
 | **Option**                                           | **Default**     | **Description**                                                                                                                                                                                                                                                                                                                                        |
